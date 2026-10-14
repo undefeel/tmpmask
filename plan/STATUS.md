@@ -13,11 +13,11 @@
 
 | ID | task_id | dispatch_id | исполнитель | worktree (path) | запущен | заметки |
 |----|---------|-------------|-------------|-----------------|---------|---------|
-| 03-01a | task_2bbce068c613 | ctx_f08c73fb3b19 | sonnet (claude-sonnet-5-5) | /Users/kodoku/orca/workspaces/tmpmask/t03-01 | 2026-10-14 | цепочка: b и c в этом же worktree |
+| 03-01b | task_55c5fb5cf41a | ctx_53d545c60801 | gemini (antigravity) | /Users/kodoku/orca/workspaces/tmpmask/t03-01 | 2026-10-14 | addendum отправлен: KeyError по-английски; терминал 03-01a retained (user_owned) |
 
 ## Очередь
 
-- Ожидают зависимостей: 03-01b (после 03-01a), 03-01c (после 03-01b) — worktree path:/Users/kodoku/orca/workspaces/tmpmask/t03-01
+- Ожидают зависимостей: 03-01c (после 03-01b; передать ему DEVIATIONS из worker_done 03-01b) — worktree path:/Users/kodoku/orca/workspaces/tmpmask/t03-01
 - Готовы к запуску: —
 - На проверке/мерже: —
 - Требуют решения пользователя: —

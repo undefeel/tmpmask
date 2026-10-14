@@ -22,7 +22,7 @@ dev = [
 include = ["tmpmask*"]
 
 [tool.setuptools.package-data]
-tmpmask = ["*.toml"]
+tmpmask = ["*.toml", "assets/*.png"]
 
 [tool.ruff]
 line-length = 100

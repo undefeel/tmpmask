@@ -10,4 +10,4 @@
 | 02-03 | Сглаживание и fade портала | тесты EMA, fade-in/out, удержание и сброс | 01-01 | `tmpmask/smoothing.py`, `tests/test_smoothing.py` | gemini | done | task_a974bb80e5f2 | ctx_078294e98e5e |
 | 02-04 | Жест щепоти с фронтом и кулдауном | тесты: одно срабатывание на щепоть, кулдаун, раскрытая рука не срабатывает | 01-01 | `tmpmask/gestures.py`, `tests/test_gestures.py` | gemini | done | task_4813d6757988 | ctx_5adbb2fdddfc |
 | 02-05 | Трекер MediaPipe → `list[Hand]` | тесты: пустой кадр → [], конвертация landmark → пиксели | 01-01 | `tmpmask/tracker.py`, `tests/test_tracker.py` | gemini | done | task_9388e5b3efb4 | ctx_b3483b333820 |
-| 02-06 | Скриншоты и запись MP4 | тесты во временной папке: PNG читается, MP4 непустой, имена по времени | 01-01 | `tmpmask/capture.py`, `tests/test_capture.py` | gemini | in_progress | task_64cc70401c36 | ctx_efffe9885970 |
+| 02-06 | Скриншоты и запись MP4 | тесты во временной папке: PNG читается, MP4 непустой, имена по времени | 01-01 | `tmpmask/capture.py`, `tests/test_capture.py` | gemini | done | task_64cc70401c36 | ctx_efffe9885970 |

@@ -6,18 +6,18 @@
 
 - run_id: `run_dba35f978b37`
 - objective: tmpmask: hand portal filters app (plan/PLAN.md stages 01-03)
-- этап: 02 Ядро (в работе только 02-06)
+- этап: 03 Приложение (02 закрыт полностью)
 - интеграционная ветка: `undefeel/core-2` (= `main`)
 
 ## Активные воркеры
 
 | ID | task_id | dispatch_id | исполнитель | worktree (path) | запущен | заметки |
 |----|---------|-------------|-------------|-----------------|---------|---------|
-| 02-06 | task_64cc70401c36 | ctx_efffe9885970 | gemini (antigravity) | /Users/kodoku/orca/workspaces/tmpmask/t02-06 | 2026-10-14 |  |
+| 03-01a | task_2bbce068c613 | ctx_f08c73fb3b19 | sonnet (claude-sonnet-5-5) | /Users/kodoku/orca/workspaces/tmpmask/t03-01 | 2026-10-14 | цепочка: b и c в этом же worktree |
 
 ## Очередь
 
-- Ожидают зависимостей: 03-01a/b/c (после всех 02)
+- Ожидают зависимостей: 03-01b (после 03-01a), 03-01c (после 03-01b) — worktree path:/Users/kodoku/orca/workspaces/tmpmask/t03-01
 - Готовы к запуску: —
 - На проверке/мерже: —
 - Требуют решения пользователя: —

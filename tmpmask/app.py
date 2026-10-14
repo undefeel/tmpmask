@@ -170,47 +170,50 @@ def main(argv: Sequence[str] | None = None) -> int:
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, config.width)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, config.height)
 
-    tracker = HandTracker(config.model)
-    win_title = t("app.title")
-    cv2.namedWindow(win_title)
-
-    print(
-        t(
-            "messages.startup_hint",
-            filter=filter_name(config.filter),
-            output_dir=config.output_dir,
-        )
-    )
-
-    def frame_generator() -> Iterable[np.ndarray]:
-        while True:
-            fail_count = 0
-            while fail_count < 30:
-                ok, f = cap.read()
-                if ok and f is not None:
-                    yield f
-                    break
-                fail_count += 1
-                time.sleep(0.03)
-            else:
-                raise FrameReadError
-
-    def show_cb(frame: np.ndarray) -> int:
-        cv2.imshow(win_title, frame)
-        raw_key = cv2.waitKey(1)
-        if cv2.getWindowProperty(win_title, cv2.WND_PROP_VISIBLE) < 1:
-            return KEY_WINDOW_CLOSED
-        k = raw_key & 0xFF
-        if k == 0xFF:
-            return KEY_NONE
-        return k
-
+    tracker = None
     try:
-        code = run(frame_generator(), tracker, config, show=show_cb)
-    except KeyboardInterrupt:
-        code = EXIT_OK
+        tracker = HandTracker(config.model)
+        win_title = t("app.title")
+        cv2.namedWindow(win_title)
+
+        print(
+            t(
+                "messages.startup_hint",
+                filter=filter_name(config.filter),
+                output_dir=config.output_dir,
+            )
+        )
+
+        def frame_generator() -> Iterable[np.ndarray]:
+            while True:
+                fail_count = 0
+                while fail_count < 30:
+                    ok, f = cap.read()
+                    if ok and f is not None:
+                        yield f
+                        break
+                    fail_count += 1
+                    time.sleep(0.03)
+                else:
+                    raise FrameReadError
+
+        def show_cb(frame: np.ndarray) -> int:
+            cv2.imshow(win_title, frame)
+            raw_key = cv2.waitKey(1)
+            if cv2.getWindowProperty(win_title, cv2.WND_PROP_VISIBLE) < 1:
+                return KEY_WINDOW_CLOSED
+            k = raw_key & 0xFF
+            if k == 0xFF:
+                return KEY_NONE
+            return k
+
+        try:
+            code = run(frame_generator(), tracker, config, show=show_cb)
+        except KeyboardInterrupt:
+            code = EXIT_OK
     finally:
-        tracker.close()
+        if tracker is not None:
+            tracker.close()
         cap.release()
         cv2.destroyAllWindows()
 

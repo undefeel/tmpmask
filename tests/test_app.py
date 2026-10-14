@@ -1,6 +1,7 @@
 from datetime import datetime
 from pathlib import Path
 
+import cv2
 import numpy as np
 
 from tmpmask.app import (
@@ -9,8 +10,10 @@ from tmpmask.app import (
     FrameReadError,
     run,
 )
+from tmpmask.capture import Recorder
 from tmpmask.config import Config
 from tmpmask.handtypes import INDEX_TIP, MIDDLE_MCP, THUMB_TIP, WRIST, Hand
+from tmpmask.texts import filter_name, t
 
 
 def make_hand(
@@ -47,6 +50,30 @@ class FakeTracker:
             self.idx += 1
             return res
         return []
+
+
+class SpyRecorder(Recorder):
+    def __init__(self, output_dir: Path, fps: float = 30.0) -> None:
+        super().__init__(output_dir, fps)
+        self.written_frames: list[np.ndarray] = []
+
+    def write(self, frame: np.ndarray) -> None:
+        self.written_frames.append(frame.copy())
+        super().write(frame)
+
+
+def has_red_dot_pixels(frame: np.ndarray) -> bool:
+    """Check if any pixel in the top-right corner region matches pure red (0, 0, 255)."""
+    h, w = frame.shape[:2]
+    r = max(6, round(h / 72))
+    # Bounding box around the red dot center (w - 3*r, 3*r) with radius r
+    x_min = max(0, w - 4 * r - 2)
+    x_max = min(w, w - 2 * r + 2)
+    y_min = max(0, 2 * r - 2)
+    y_max = min(h, 4 * r + 2)
+    region = frame[y_min:y_max, x_min:x_max]
+    red_mask = (region[:, :, 0] == 0) & (region[:, :, 1] == 0) & (region[:, :, 2] == 255)
+    return bool(np.any(red_mask))
 
 
 def test_run_ten_frames_two_hands(tmp_path: Path):
@@ -92,10 +119,11 @@ def test_run_key_navigation_and_quit(tmp_path: Path):
     code = run(frames, tracker, cfg, show=scripted_show, say=messages.append)
     assert code == 0
     assert len(tracker.calls) == 5  # exited early on 'q'
-    assert any("Тепловизор" in m for m in messages)
-    assert any("Океан" in m for m in messages)
+    assert any(filter_name("thermal") in m for m in messages)
+    assert any(filter_name("purple") in m for m in messages)
+    assert any(filter_name("ocean") in m for m in messages)
     # Check that '5' was only announced once
-    ocean_messages = [m for m in messages if "Океан" in m]
+    ocean_messages = [m for m in messages if filter_name("ocean") in m]
     assert len(ocean_messages) == 1
 
 
@@ -135,7 +163,35 @@ def test_run_screenshot(tmp_path: Path):
     screenshots = list(tmp_path.glob("*.png"))
     assert len(screenshots) == 1
     assert screenshots[0].name == "tmpmask_20261014_153000.png"
-    assert any("Скриншот сохранён" in m for m in messages)
+    img = cv2.imread(str(screenshots[0]))
+    assert not has_red_dot_pixels(img)
+    prefix_saved = t("messages.screenshot_saved", path="").split(":")[0]
+    assert any(prefix_saved in m for m in messages)
+
+
+def test_run_screenshot_while_recording(tmp_path: Path):
+    cfg = Config(output_dir=tmp_path)
+    tracker = FakeTracker()
+    frames = [np.zeros((120, 160, 3), dtype=np.uint8) for _ in range(5)]
+    # Frame 0: start recording ('r'), Frame 1: take screenshot ('s'), Frame 2: quit ('q')
+    keys = [ord("r"), ord("s"), ord("q")]
+    it = iter(keys)
+
+    messages: list[str] = []
+    fixed_time = datetime(2026, 10, 14, 15, 30, 0)
+    code = run(
+        frames,
+        tracker,
+        cfg,
+        show=lambda f: next(it),
+        say=messages.append,
+        now=lambda: fixed_time,
+    )
+    assert code == 0
+    screenshots = list(tmp_path.glob("*.png"))
+    assert len(screenshots) == 1
+    saved_img = cv2.imread(str(screenshots[0]))
+    assert not has_red_dot_pixels(saved_img)
 
 
 def test_run_recording_start_stop(tmp_path: Path):
@@ -157,30 +213,36 @@ def test_run_recording_start_stop(tmp_path: Path):
 
     messages: list[str] = []
     fixed_time = datetime(2026, 10, 14, 15, 30, 0)
+    spy_recorder = SpyRecorder(tmp_path, fps=30.0)
     code = run(
         frames,
         tracker,
         cfg,
         show=mock_show,
         say=messages.append,
+        recorder=spy_recorder,
         now=lambda: fixed_time,
     )
     assert code == 0
     videos = list(tmp_path.glob("*.mp4"))
     assert len(videos) == 1
     assert videos[0].stat().st_size > 0
-    assert any("Запись начата" in m for m in messages)
-    assert any("Запись остановлена" in m for m in messages)
+    prefix_started = t("messages.recording_started", path="").split(":")[0]
+    prefix_stopped = t("messages.recording_stopped", path="").split(":")[0]
+    assert any(prefix_started in m for m in messages)
+    assert any(prefix_stopped in m for m in messages)
 
-    # Check that shown_frames while recording had red dot (BGR [0, 0, 255])
-    # Shown frame index 1, 2, 3 were recorded
-    # Radius r = max(6, round(120 / 72)) = 6. Center = (160 - 18, 18) = (142, 18).
-    # Check pixel around (18, 142) in y, x
-    rec_frame = shown_frames[2]
-    assert np.array_equal(rec_frame[18, 142], [0, 0, 255])
+    # Frame 0 was when 'r' was pressed, so recording was not yet active during dot-drawing
+    assert not has_red_dot_pixels(shown_frames[0])
+    # Frames 1, 2, 3 were during recording: shown frames must have red dot
+    assert has_red_dot_pixels(shown_frames[1])
+    assert has_red_dot_pixels(shown_frames[2])
+    assert has_red_dot_pixels(shown_frames[3])
 
-    # Check frame 0 before recording was started: no red dot
-    assert np.array_equal(shown_frames[0][18, 142], [0, 0, 0])
+    # Assert spy recorder received frames, and none has red dot
+    assert len(spy_recorder.written_frames) > 0
+    for wf in spy_recorder.written_frames:
+        assert not has_red_dot_pixels(wf)
 
 
 def test_run_recording_auto_finalized_on_exit(tmp_path: Path):
@@ -192,17 +254,21 @@ def test_run_recording_auto_finalized_on_exit(tmp_path: Path):
     key_iter = iter(keys)
 
     messages: list[str] = []
+    spy_recorder = SpyRecorder(tmp_path, fps=30.0)
     code = run(
         frames,
         tracker,
         cfg,
         show=lambda f: next(key_iter),
         say=messages.append,
+        recorder=spy_recorder,
     )
     assert code == 0
+    assert spy_recorder.is_recording is False
     videos = list(tmp_path.glob("*.mp4"))
     assert len(videos) == 1
-    assert any("Запись остановлена" in m for m in messages)
+    prefix_stopped = t("messages.recording_stopped", path="").split(":")[0]
+    assert any(prefix_stopped in m for m in messages)
 
 
 def test_run_pinch_switches_filter(tmp_path: Path):
@@ -214,9 +280,10 @@ def test_run_pinch_switches_filter(tmp_path: Path):
     messages: list[str] = []
     code = run(frames, tracker, cfg, say=messages.append)
     assert code == 0
-    switches = [m for m in messages if "Фильтр:" in m]
+    prefix_switched = t("messages.filter_switched", name="").split(":")[0]
+    switches = [m for m in messages if prefix_switched in m]
     assert len(switches) == 1
-    assert "Тепловизор" in switches[0]
+    assert filter_name("thermal") in switches[0]
 
 
 def test_run_camera_lost(tmp_path: Path):
@@ -230,7 +297,7 @@ def test_run_camera_lost(tmp_path: Path):
     messages: list[str] = []
     code = run(failing_frames(), tracker, cfg, say=messages.append)
     assert code == 4
-    assert any("Камера не вернула кадр" in m for m in messages)
+    assert any(t("errors.camera_no_frame") in m for m in messages)
 
 
 def test_run_hands_portal_rendering(tmp_path: Path):

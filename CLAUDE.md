@@ -72,7 +72,7 @@ orca orchestration task-create --task-title "NN-MMb: <кратко>" \
 
 Итог ревью:
 - «замечаний нет» → мерж ветки worktree; в мерж-коммите удалить `drafts/<NN-MM>/`
-  (`git merge --no-ff --no-commit …`, `git rm -r drafts/<NN-MM>`, `git commit`).
+  (`git merge --no-ff --no-commit …`, `git rm -rf drafts/<NN-MM>` — без `-f` git откажется удалять только что застейдженные файлы, — проверить `ls drafts`, затем `git commit`).
 - есть замечания → мелочь правлю сам при мерже; остальное — новая задача gemini
   (`NN-MMd`, …) в том же worktree с конкретным списком замечаний из ревью, затем
   повторное ревью.

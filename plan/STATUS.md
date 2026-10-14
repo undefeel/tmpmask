@@ -6,14 +6,14 @@
 
 - run_id: `run_dba35f978b37`
 - objective: tmpmask: hand portal filters app (plan/PLAN.md stages 01-03)
-- этап: 05 Фильтр «Саблезуб» (04 ручная проверка — у пользователя)
+- этап: 05 закрыт; ждём ручную проверку пользователя (04)
 - интеграционная ветка: `undefeel/core-2` (= `main`)
 
 ## Активные воркеры
 
 | ID | task_id | dispatch_id | исполнитель | worktree (path) | запущен | заметки |
 |----|---------|-------------|-------------|-----------------|---------|---------|
-| 05-02 | task_e05879ca4dc7 | ctx_c97a426f6cd6 | gemini (antigravity) | /Users/kodoku/orca/workspaces/tmpmask/t05-02 | 2026-10-14 |  |
+| — | | | | | | |
 
 ## Очередь
 

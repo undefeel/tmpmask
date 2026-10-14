@@ -1,7 +1,5 @@
 # 01 — Каркас
 
-Задачи этапа появятся после утверждения PLAN.md. Каркас — первая задача, идёт одна.
-
 | ID | Описание | Критерии готовности | Зависимости | Файлы | Исполнитель | Статус | task_id | dispatch_id |
 |----|----------|---------------------|-------------|-------|-------------|--------|---------|-------------|
-| 01-01 | _TODO: каркас проекта_ | _TODO: команда сборки/тестов проходит_ | — | _TODO_ | gemini | todo | — | — |
+| 01-01 | Каркас: pyproject, пакет `tmpmask`, `handtypes.py`, smoke-тесты, ruff, .gitignore | `ruff check` и `pytest` зелёные; `python -m tmpmask` выходит с кодом 0 | — | `pyproject.toml`, `.gitignore`, `tmpmask/__init__.py`, `tmpmask/__main__.py`, `tmpmask/handtypes.py`, `tests/__init__.py`, `tests/test_handtypes.py`, `models/.gitkeep` | gemini | todo | — | — |

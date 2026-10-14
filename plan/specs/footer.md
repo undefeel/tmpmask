@@ -3,7 +3,9 @@
 
 ## GENERAL RULES
 
-- Project context: tmpmask. Architecture and stack: TODO (fill from plan/PLAN.md once approved). Full check command: TODO.
+- Project context: tmpmask is a Python 3.12 desktop app: a webcam window where two hands form a quadrilateral "portal" (thumb and index fingertips of each hand) and an image filter is applied inside it. Package `tmpmask/` with small, camera-free testable modules (handtypes, tracker, portal, smoothing, gestures, filters, capture, config, texts, app). Stack: opencv-python, mediapipe (Tasks API `HandLandmarker`, never the legacy `mp.solutions`), numpy, pytest, ruff; packaging via `pyproject.toml` with a `dev` extra.
+- Environment: if `.venv` is missing in your worktree, create it with `/opt/homebrew/bin/python3.12 -m venv .venv && .venv/bin/pip install -e '.[dev]'`. `.venv` is git-ignored; never commit it. Full check: `.venv/bin/ruff check . && .venv/bin/pytest -q` — it must stay green, including tests you did not write.
+- Tests must not need a camera, a display, or network access.
 - This spec is everything you get. Do not edit `CLAUDE.md` or anything under `plan/`.
 - Identifiers and code comments in English; user-facing texts (UI strings, docs for people) in Russian.
 - Edit only the files listed under **Ownership**. If another file must change, do not edit it — explain why in `worker_done`.

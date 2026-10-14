@@ -67,6 +67,9 @@ orca orchestration task-create --task-title "NN-MMb: <кратко>" \
   --deps '["<task_id NN-MMa>"]' --json
 ```
 
+После worker_done задачи `NN-MMb` её список DEVIATIONS передаётся ревьюеру: сразу после
+старта `NN-MMc` — `orca orchestration send --to dispatch:<dispatch NN-MMc> --subject "DEVIATIONS from NN-MMb" --body "<список>" --json`.
+
 Итог ревью:
 - «замечаний нет» → мерж ветки worktree; в мерж-коммите удалить `drafts/<NN-MM>/`
   (`git merge --no-ff --no-commit …`, `git rm -r drafts/<NN-MM>`, `git commit`).

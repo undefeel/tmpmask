@@ -13,8 +13,9 @@ import numpy as np
 
 from tmpmask.capture import Recorder, save_screenshot
 from tmpmask.config import Config, parse_args
-from tmpmask.filters import FILTER_IDS, get_filter, next_filter_id
+from tmpmask.filters import FILTER_IDS, OVERLAY_IMAGES, OVERLAY_OPACITY, get_filter, next_filter_id
 from tmpmask.gestures import PinchTrigger
+from tmpmask.overlay import ASSETS_DIR, load_rgba, render_overlay
 from tmpmask.portal import portal_quad, render_portal
 from tmpmask.smoothing import PortalSmoother
 from tmpmask.texts import filter_name, t
@@ -49,6 +50,7 @@ def run(
     smoother = PortalSmoother()
     trigger = PinchTrigger()
     t0 = clock()
+    overlay_cache: dict[str, np.ndarray] = {}
 
     if recorder is None:
         rec = Recorder(config.output_dir, 30.0)
@@ -92,9 +94,15 @@ def run(
             # 6. smoother
             smoothed, opacity = smoother.update(quad)
 
-            # 7. render_portal
+            # 7. render_portal / render_overlay
             if smoothed is not None:
-                clean = render_portal(frame, smoothed, get_filter(current), opacity)
+                if current in OVERLAY_IMAGES:
+                    if current not in overlay_cache:
+                        overlay_cache[current] = load_rgba(ASSETS_DIR / OVERLAY_IMAGES[current])
+                    image = overlay_cache[current]
+                    clean = render_overlay(frame, smoothed, image, opacity * OVERLAY_OPACITY)
+                else:
+                    clean = render_portal(frame, smoothed, get_filter(current), opacity)
             else:
                 clean = frame
 
@@ -119,7 +127,7 @@ def run(
                 switch_filter(next_filter_id(current, 1))
             elif key in (ord("p"), ord("P")):
                 switch_filter(next_filter_id(current, -1))
-            elif ord("1") <= key <= ord("8"):
+            elif ord("1") <= key <= ord("9"):
                 idx = key - ord("1")
                 if 0 <= idx < len(FILTER_IDS):
                     switch_filter(FILTER_IDS[idx])

@@ -104,7 +104,7 @@ def test_run_key_navigation_and_quit(tmp_path: Path):
     frames = [np.zeros((120, 160, 3), dtype=np.uint8) for _ in range(20)]
     tracker = FakeTracker()
 
-    keys = [ord("n"), ord("p"), ord("5"), ord("5"), ord("q")]
+    keys = [ord("n"), ord("p"), ord("5"), ord("5"), ord("9"), ord("q")]
     key_idx = 0
 
     def scripted_show(frame: np.ndarray) -> int:
@@ -118,10 +118,11 @@ def test_run_key_navigation_and_quit(tmp_path: Path):
     messages: list[str] = []
     code = run(frames, tracker, cfg, show=scripted_show, say=messages.append)
     assert code == 0
-    assert len(tracker.calls) == 5  # exited early on 'q'
+    assert len(tracker.calls) == 6  # exited early on 'q'
     assert any(filter_name("thermal") in m for m in messages)
     assert any(filter_name("purple") in m for m in messages)
     assert any(filter_name("ocean") in m for m in messages)
+    assert any(filter_name("sabertooth") in m for m in messages)
     # Check that '5' was only announced once
     ocean_messages = [m for m in messages if filter_name("ocean") in m]
     assert len(ocean_messages) == 1
@@ -356,3 +357,43 @@ def test_run_mirror_flips_frame(tmp_path: Path):
     frame_received_by_tracker = tracker.calls[0][0]
     expected_flipped = np.fliplr(test_frame)
     assert np.array_equal(frame_received_by_tracker, expected_flipped)
+
+
+def test_run_hands_sabertooth_overlay_rendering(tmp_path: Path):
+    cfg = Config(output_dir=tmp_path, filter="sabertooth")
+    # Large portal: left hand at (10, 60), right hand at (150, 60)
+    h1 = make_hand((10.0, 60.0), (20.0, 10.0), (20.0, 110.0))
+    h2 = make_hand((150.0, 60.0), (140.0, 10.0), (140.0, 110.0))
+
+    tracker = FakeTracker([[h1, h2]] * 15)
+    input_frame = np.full((120, 160, 3), 100, dtype=np.uint8)
+    frames = [input_frame.copy() for _ in range(15)]
+
+    shown_frames: list[np.ndarray] = []
+    code = run(
+        frames,
+        tracker,
+        cfg,
+        show=lambda f: shown_frames.append(f.copy()) or KEY_NONE,
+    )
+    assert code == 0
+
+    last_frame = shown_frames[-1]
+    portal_center_pixel = last_frame[60, 80]
+    outside_pixel = last_frame[5, 5]
+
+    # Pixel outside the portal is unchanged
+    assert np.array_equal(outside_pixel, input_frame[5, 5])
+
+    # Portal centre differs from pure input
+    assert not np.array_equal(portal_center_pixel, input_frame[60, 80])
+
+    # Portal centre matches no classic filter output
+    from tmpmask.filters import FILTER_IDS, OVERLAY_IMAGES, get_filter
+
+    for fid in FILTER_IDS:
+        if fid in OVERLAY_IMAGES:
+            continue
+        classic_fn = get_filter(fid)
+        classic_out = classic_fn(input_frame.copy())
+        assert not np.array_equal(portal_center_pixel, classic_out[60, 80]), f"Matched {fid}"

@@ -16,7 +16,11 @@ FILTER_IDS: tuple[str, ...] = (
     "sepia",
     "pixelate",
     "edges",
+    "sabertooth",
 )
+
+OVERLAY_IMAGES: dict[str, str] = {"sabertooth": "sabertooth.png"}
+OVERLAY_OPACITY = 0.6
 
 # Classic sepia transformation matrix for BGR representation:
 # [B']   [0.131 0.534 0.272] [B]
@@ -88,6 +92,11 @@ def filter_edges(frame: np.ndarray) -> np.ndarray:
     return out
 
 
+def filter_sabertooth(frame: np.ndarray) -> np.ndarray:
+    """Identity filter; overlay filters are rendered by tmpmask.overlay."""
+    return frame.copy()
+
+
 _REGISTRY: dict[str, FilterFn] = {
     "purple": filter_purple,
     "thermal": filter_thermal,
@@ -97,6 +106,7 @@ _REGISTRY: dict[str, FilterFn] = {
     "sepia": filter_sepia,
     "pixelate": filter_pixelate,
     "edges": filter_edges,
+    "sabertooth": filter_sabertooth,
 }
 
 

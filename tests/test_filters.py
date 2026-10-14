@@ -1,10 +1,12 @@
 import numpy as np
 import pytest
 
-from tmpmask.filters import FILTER_IDS, FilterFn, get_filter, next_filter_id
+from tmpmask.filters import FILTER_IDS, OVERLAY_IMAGES, FilterFn, get_filter, next_filter_id
+
+CLASSIC_FILTER_IDS = [fid for fid in FILTER_IDS if fid not in OVERLAY_IMAGES]
 
 
-@pytest.mark.parametrize("filter_id", FILTER_IDS)
+@pytest.mark.parametrize("filter_id", CLASSIC_FILTER_IDS)
 def test_filter_properties(filter_id: str) -> None:
     fn: FilterFn = get_filter(filter_id)
 
@@ -73,8 +75,8 @@ def test_edges_coloring() -> None:
 
 def test_next_filter_id_cycling() -> None:
     assert next_filter_id("purple", 1) == "thermal"
-    assert next_filter_id("edges", 1) == "purple"  # wraps forward
-    assert next_filter_id("purple", -1) == "edges"  # wraps backward
+    assert next_filter_id("sabertooth", 1) == "purple"  # wraps forward
+    assert next_filter_id("purple", -1) == "sabertooth"  # wraps backward
     assert next_filter_id("sepia", 2) == "edges"
     assert next_filter_id("purple", 0) == "purple"
     assert next_filter_id("gray", len(FILTER_IDS)) == "gray"
@@ -83,3 +85,14 @@ def test_next_filter_id_cycling() -> None:
 def test_get_filter_unknown_id() -> None:
     with pytest.raises(KeyError):
         get_filter("nope")
+
+
+def test_sabertooth_filter() -> None:
+    assert len(FILTER_IDS) == 9
+    assert FILTER_IDS[-1] == "sabertooth"
+
+    fn = get_filter("sabertooth")
+    img = np.array([[[1, 2, 3], [4, 5, 6]]], dtype=np.uint8)
+    out = fn(img)
+    assert out is not img
+    assert np.array_equal(out, img)

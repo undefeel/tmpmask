@@ -54,5 +54,11 @@ def test_constants():
     assert FINGERTIPS == (4, 8, 12, 16, 20)
 
 
-def test_main_smoke():
-    assert main() == 0
+def test_main_smoke(capsys):
+    import tmpmask.app
+    assert main is tmpmask.app.main
+    with pytest.raises(SystemExit) as exc:
+        main(["--help"])
+    assert exc.value.code == 0
+    captured = capsys.readouterr()
+    assert "tmpmask" in captured.out

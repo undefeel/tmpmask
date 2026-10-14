@@ -6,7 +6,7 @@
 
 - run_id: `run_dba35f978b37`
 - objective: tmpmask: hand portal filters app (plan/PLAN.md stages 01-03)
-- этап: 02 Ядро (01 закрыт, смержен)
+- этап: 02 Ядро (готово: 02-03)
 - интеграционная ветка: `undefeel/core-2` (= `main`)
 
 ## Активные воркеры
@@ -15,14 +15,14 @@
 |----|---------|-------------|-------------|-----------------|---------|---------|
 | 02-01 | task_53a09b189800 | ctx_84bb7ed81375 | gemini (antigravity) | /Users/kodoku/orca/workspaces/tmpmask/t02-01 | 2026-10-14 |  |
 | 02-02 | task_23fd72983613 | ctx_66193ea4df14 | gemini (antigravity) | /Users/kodoku/orca/workspaces/tmpmask/t02-02 | 2026-10-14 | retry после agent_readiness |
-| 02-03 | task_a974bb80e5f2 | ctx_078294e98e5e | gemini (antigravity) | /Users/kodoku/orca/workspaces/tmpmask/t02-03 | 2026-10-14 |  |
+| 02-06 | task_64cc70401c36 | ctx_efffe9885970 | gemini (antigravity) | /Users/kodoku/orca/workspaces/tmpmask/t02-06 | 2026-10-14 |  |
 | 02-04 | task_4813d6757988 | ctx_5adbb2fdddfc | gemini (antigravity) | /Users/kodoku/orca/workspaces/tmpmask/t02-04 | 2026-10-14 |  |
 | 02-05 | task_9388e5b3efb4 | ctx_b3483b333820 | gemini (antigravity) | /Users/kodoku/orca/workspaces/tmpmask/t02-05 | 2026-10-14 |  |
 
 ## Очередь
 
 - Ожидают зависимостей: 03-01a/b/c (после всех 02)
-- Готовы к запуску: 02-06 (ждёт слот, лимит 5)
+- Готовы к запуску: —
 - На проверке/мерже: —
 - Требуют решения пользователя: —
 

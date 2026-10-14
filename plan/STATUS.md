@@ -6,7 +6,7 @@
 
 - run_id: `run_dba35f978b37`
 - objective: tmpmask: hand portal filters app (plan/PLAN.md stages 01-03)
-- этап: 02 Ядро (готово: 02-01, 02-03, 02-04)
+- этап: 02 Ядро (готово: 02-01, 02-03, 02-04, 02-05; в работе 02-02, 02-06)
 - интеграционная ветка: `undefeel/core-2` (= `main`)
 
 ## Активные воркеры
@@ -15,7 +15,6 @@
 |----|---------|-------------|-------------|-----------------|---------|---------|
 | 02-02 | task_23fd72983613 | ctx_66193ea4df14 | gemini (antigravity) | /Users/kodoku/orca/workspaces/tmpmask/t02-02 | 2026-10-14 | retry после agent_readiness |
 | 02-06 | task_64cc70401c36 | ctx_efffe9885970 | gemini (antigravity) | /Users/kodoku/orca/workspaces/tmpmask/t02-06 | 2026-10-14 |  |
-| 02-05 | task_9388e5b3efb4 | ctx_b3483b333820 | gemini (antigravity) | /Users/kodoku/orca/workspaces/tmpmask/t02-05 | 2026-10-14 |  |
 
 ## Очередь
 
